@@ -5,7 +5,7 @@
                 return Math.random() * (b - a) + a;
             },
             
-            // 가우시안 분포에 가까운 랜덤값
+            // 가우시안 분포에 가까운 랜덤값 
             rand_normalish: function() {
                 const r = Math.random() + Math.random() + Math.random() + Math.random();
                 return (r / 4.0) * 2.0 - 1;

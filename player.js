@@ -44,7 +44,7 @@ export const player = (() => {
             model.scale.setScalar(9); // 기린 크게
             break;
           case 'monkey.glb':
-            model.scale.setScalar(5); // 원숭이 적당히
+            model.scale.setScalar(4); // 원숭이 적당히
             break;
           case 'otter.glb':
             model.scale.setScalar(4); // 수달

@@ -9,7 +9,7 @@ const keys = {
   backward: false,
   left: false,
   right: false,
-  transform: false, // r 키 추가
+  transform: false, // r 키 추가.
 };
 
 window.addEventListener('keydown', (e) => {
