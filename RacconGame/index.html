@@ -1,0 +1,104 @@
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>3D 너구리 게임</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                background-color: #000;
+                font-family: Arial, sans-serif;
+            }
+            
+            #container {
+                width: 100vw;
+                height: 100vh;
+            }
+            
+            #info {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                color: white;
+                z-index: 100;
+                background: rgba(0,0,0,0.8);
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+                max-width: 300px;
+            }
+            
+            #info h3 {
+                margin: 0 0 15px 0;
+                color: #FFD700;
+                font-size: 18px;
+            }
+            
+            #info p {
+                margin: 8px 0;
+                font-size: 14px;
+                line-height: 1.4;
+            }
+            
+            .status {
+                color: #90EE90;
+            }
+            
+            .instruction {
+                color: #87CEEB;
+                border-top: 1px solid #333;
+                padding-top: 10px;
+                margin-top: 15px;
+            }
+        .instruction {
+                color: #87CEEB;
+                border-top: 1px solid #333;
+                padding-top: 10px;
+                margin-top: 15px;
+            }
+
+            .animal-display {
+                position: absolute;
+                bottom: 20px;
+                right: 20px;
+                width: 100px; /* Adjust as needed */
+                height: 100px; /* Adjust as needed */
+                background-color: rgba(0, 0, 0, 0.5);
+                border-radius: 10px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                overflow: hidden;
+                border: 2px solid #FFD700;
+            }
+
+            .animal-display img {
+                max-width: 90%;
+                max-height: 90%;
+                object-fit: contain;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container"></div>
+        <div id="info">
+            <h3>너구리 게임</h3>
+            <p class="status">✅ 조명 시스템</p>
+            <p class="status">✅ 하늘 배경 및 안개</p>
+            <p class="status">✅ 수학 유틸리티 함수</p>
+            <p class="status">✅ FBXLoader 로드</p>
+            <p class="status">✅ 3D 너구리 모델 로드</p>
+            <p class="status">✅ 애니메이션 시스템</p>
+            <p style="font-size: 12px; color: #666; margin-top: 10px;">콘솔에서 로드 상태를 확인하세요</p>
+        </div>
+
+        <div id="animal-display" class="animal-display">
+            <img id="animal-image" src="" alt="Animal">
+        </div>
+        
+        <script type="module" src="main.js"></script>
+    </body>
+    </html>
