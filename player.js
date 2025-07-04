@@ -5,91 +5,97 @@ export const player = (() => {
   
   class Player {
     constructor(params) {
-      this.position_ = new THREE.Vector3(0, 3.2, 0);
+      this.position_ = new THREE.Vector3(0, 0, 0);
       this.velocity_ = 0.0;
       this.params_ = params;
       this.mesh_ = null;
       this.mixer_ = null;
       this.keys_ = params.keys; // 키 상태 참조
-      this.isTransformed_ = false; // 변신 상태
       this._targetRotation = new THREE.Quaternion();
 
-      this.LoadModel_();
+      // 초기 모델 로드
+      if (params.initialModelPath) {
+        this.LoadModel_(params.initialModelPath);
+      }
     }
 
-    LoadModel_() {
-      // 참고: test.glb는 예시 파일명입니다. resources/Animal/ 폴더에 원하는 모델을 넣고 파일명을 수정하세요.
-      const modelFile = this.isTransformed_ ? 'elephant.glb' : 'raccoon.glb';
-      
+    LoadModel_(modelPath) {
       if (this.mesh_) {
         this.params_.scene.remove(this.mesh_);
+        this.mesh_ = null; // 기존 메쉬 제거 후 초기화
+        if (this.mixer_) {
+          this.mixer_.stopAllAction();
+          this.mixer_ = null;
+        }
       }
 
       const loader = new GLTFLoader();
-      loader.setPath('./resources/Animal/');
-      loader.load(modelFile, (gltf) => {
-        console.log(`${modelFile} 모델 로드 완료:`, gltf);
+      loader.load(modelPath, (gltf) => {
+        console.log(`${modelPath} 모델 로드 완료:`, gltf);
 
         const model = gltf.scene;
-        // 동물 모델 파일명에 따라 scale 설정
-        switch (modelFile) {
+        // 모델 파일명에 따라 scale 설정
+        const modelFileName = modelPath.split('/').pop(); // 파일 이름만 추출
+        switch (modelFileName) {
           case 'elephant.glb':
             model.scale.setScalar(8); // 코끼리 크게
+            break;
+          case 'giraffe.glb':
+            model.scale.setScalar(9); // 기린 크게
             break;
           case 'monkey.glb':
             model.scale.setScalar(5); // 원숭이 적당히
             break;
+          case 'otter.glb':
+            model.scale.setScalar(4); // 수달
+            break;
+          case 'snake.glb':
+            model.scale.setScalar(3); // 뱀
+            break;
+          case 'turttle.glb':
+            model.scale.setScalar(3); // 거북이
+            break;
+          case 'mole.glb':
+            model.scale.setScalar(3); // 두더지
+            break;
+          case 'parrot.glb':
+            model.scale.setScalar(3); // 앵무새
+            break;
+          case 'raccoon.glb':
+            model.scale.setScalar(4); // 너구리
+            break;
           default:
-            model.scale.setScalar(4); // 기본 (예: 너구리)
+            model.scale.setScalar(4); // 기본
         }
 
         this.mesh_ = model;
         this.params_.scene.add(this.mesh_);
-        this.mesh_.position.copy(this.position_);
 
-        model.traverse(c => {
-          let materials = c.material;
-          if (!(c.material instanceof Array)) {
-            materials = [c.material];
-          }
-
-          for (let m of materials) {
-            if (m) {
-              // 기본 재질의 specular 값을 유지하여 빛 반사를 허용합니다.
-              if (m.color) m.color.offsetHSL(0, 0, 0.2);
-            }
-          }
-
-          c.castShadow = true;
-          c.receiveShadow = true;
+        this.mixer_ = new THREE.AnimationMixer(this.mesh_);
+        gltf.animations.forEach((clip) => {
+          this.mixer_.clipAction(clip).play();
         });
 
-        this.mixer_ = new THREE.AnimationMixer(model);
+        // 모델의 바운딩 박스를 계산하여 Y축 위치 조정
+        model.updateMatrixWorld(true); // 월드 변환 행렬 업데이트
+        const bbox = new THREE.Box3().setFromObject(model);
+        const yOffset = -bbox.min.y; // 모델의 최하단 Y 좌표를 0으로 맞추기 위한 오프셋
 
-        if (gltf.animations.length > 0) {
-          // 가장 첫 번째 애니메이션을 재생합니다.
-          const clip = gltf.animations[0];
-          const action = this.mixer_.clipAction(clip);
-          action.play();
-          console.log(`애니메이션 '${clip.name}' 재생 시작`);
-        }
+        this.mesh_.position.set(0, yOffset, 0);
+        this.position_.copy(this.mesh_.position); // player의 position_도 업데이트
 
-        console.log("애니메이션 목록:", gltf.animations.map(a => a.name));
+        console.log("✅ 3D 모델 로드 및 애니메이션 설정 완료");
       },
       undefined,
       (error) => {
-        console.error(`🚨 ${modelFile} 모델 로드 실패:`, error);
-        if (this.isTransformed_) {
-            alert("두 번째 모델 파일을 찾을 수 없습니다. 'resources/Animal/' 폴더에 'test.glb' 파일을 추가하거나 player.js 파일에서 모델 파일명을 수정해주세요.");
-            this.isTransformed_ = false; // 에러 발생 시 원래 상태로 복귀
-        }
+        console.error(`🚨 ${modelPath} 모델 로드 실패:`, error);
+        alert(`모델 파일을 찾을 수 없습니다: ${modelPath}. 'resources/Animal/' 폴더에 해당 파일을 추가하거나 player.js 파일에서 모델 파일명을 수정해주세요.`);
       });
     }
 
-    Transform() {
-        this.isTransformed_ = !this.isTransformed_;
-        console.log(`변신! 현재 모델: ${this.isTransformed_ ? 'elephant.glb' : 'raccoon.glb'}`);
-        this.LoadModel_();
+    Transform(modelPath) {
+        console.log(`변신! 다음 모델: ${modelPath}`);
+        this.LoadModel_(modelPath);
     }
 
     Update(timeElapsed) {

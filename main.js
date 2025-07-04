@@ -60,6 +60,64 @@ window.addEventListener('keyup', (e) => {
     case 'KeyR': // r 키 떼면 상태 초기화
       keys.transform = false;
       break;
+    case 'KeyT': // t 키 떼면 상태 초기화
+      keys.nextAnimal = false;
+      break;
+  }
+});
+
+const animalData = [
+  { name: 'Raccoon', image: './resources/Animal/raccoon.png', model: './resources/Animal/raccoon.glb' },
+  { name: 'Monkey', image: './resources/Animal/monkey.png', model: './resources/Animal/monkey.glb' },
+  { name: 'Elephant', image: './resources/Animal/elephant.png', model: './resources/Animal/elephant.glb' },
+  { name: 'Giraffe', image: './resources/Animal/giraffe.png', model: './resources/Animal/giraffe.glb' },
+  { name: 'Otter', image: './resources/Animal/otter.png', model: './resources/Animal/otter.glb' },
+  { name: 'Snake', image: './resources/Animal/snake.png', model: './resources/Animal/snake.glb' },
+  { name: 'Mole', image: './resources/Animal/mole.png', model: './resources/Animal/mole.glb' },
+  { name: 'Parrot', image: './resources/Animal/parrot.png', model: './resources/Animal/parrot.glb' },
+  { name: 'Turtle', image: './resources/Animal/turtle.png', model: './resources/Animal/turtle.glb' },
+];
+
+let currentAnimalIndex = 0;
+
+const animalImage = document.getElementById('animal-image');
+
+function updateAnimalImageDisplay() {
+  const currentAnimal = animalData[currentAnimalIndex];
+  animalImage.src = currentAnimal.image;
+  animalImage.alt = currentAnimal.name;
+  // Optionally, update a text display for the animal name
+  // document.getElementById('animal-name-display').textContent = currentAnimal.name;
+}
+
+window.addEventListener('keydown', (e) => {
+  switch (e.code) {
+    case 'ArrowUp':
+    case 'KeyW':
+      keys.forward = true;
+      break;
+    case 'ArrowDown':
+    case 'KeyS':
+      keys.backward = true;
+      break;
+    case 'ArrowLeft':
+    case 'KeyA':
+      keys.left = true;
+      break;
+    case 'ArrowRight':
+    case 'KeyD':
+      keys.right = true;
+      break;
+    case 'KeyR': // r 키 감지
+      if (!keys.transform) { // 키를 누르고 있을 때 반복 호출 방지
+        game.player_.Transform(animalData[currentAnimalIndex].model);
+        keys.transform = true;
+      }
+      break;
+    case 'KeyT': // t 키 감지
+      currentAnimalIndex = (currentAnimalIndex + 1) % animalData.length;
+      updateAnimalImageDisplay();
+      break;
   }
 });
 
@@ -104,6 +162,7 @@ class GameStage3 {
     this.player_ = new player.Player({
       scene: this.scene,
       keys: keys,
+      initialModelPath: animalData[currentAnimalIndex].model,
     });
 
     window.addEventListener('resize', () => this.OnWindowResize(), false);
@@ -238,6 +297,7 @@ class GameStage3 {
 let game = null;
 window.addEventListener('DOMContentLoaded', () => {
   game = new GameStage3();
+  updateAnimalImageDisplay(); // 초기 동물 이미지 표시
   console.log("🎮 3단계 게임 초기화 완료!");
-  console.log("🦕 3D 공룡 모델 로드 중...");
+  console.log("🦝 3D 너구리 모델 로드 중...");
 });
