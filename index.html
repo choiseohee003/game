@@ -1,104 +1,174 @@
-    <!DOCTYPE html>
-    <html lang="ko">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>3D 너구리 게임</title>
-        <style>
-            body {
-                margin: 0;
-                padding: 0;
-                overflow: hidden;
-                background-color: #000;
-                font-family: Arial, sans-serif;
-            }
-            
-            #container {
-                width: 100vw;
-                height: 100vh;
-            }
-            
-            #info {
-                position: absolute;
-                top: 10px;
-                left: 10px;
-                color: white;
-                z-index: 100;
-                background: rgba(0,0,0,0.8);
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-                max-width: 300px;
-            }
-            
-            #info h3 {
-                margin: 0 0 15px 0;
-                color: #FFD700;
-                font-size: 18px;
-            }
-            
-            #info p {
-                margin: 8px 0;
-                font-size: 14px;
-                line-height: 1.4;
-            }
-            
-            .status {
-                color: #90EE90;
-            }
-            
-            .instruction {
-                color: #87CEEB;
-                border-top: 1px solid #333;
-                padding-top: 10px;
-                margin-top: 15px;
-            }
-        .instruction {
-                color: #87CEEB;
-                border-top: 1px solid #333;
-                padding-top: 10px;
-                margin-top: 15px;
-            }
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>손가락 숫자 인식</title>
+<style>
+  body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #2c3e50;
+    color: white;
+  }
+  h1 { margin-bottom: 15px; }
+  #main-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+  }
+  #container {
+    position: relative;
+    width: 640px;
+    height: 480px;
+    border: 5px solid #34495e;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  #video, #canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  #video { transform: scaleX(-1); }
+  #controls-container {
+      display: flex; 
+      justify-content: center;
+      gap: 10px; 
+      margin-top: 20px; 
+      align-items: center; 
+  }
+  .status-display {
+    padding: 10px 15px; 
+    background-color: #34495e; 
+    color: #ecf0f1;
+    font-size: 24px; 
+    font-weight: bold; 
+    border-radius: 10px; 
+    min-width: 200px;
+    text-align: center; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+</style>
+<!-- Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands"></script>
 
-            .animal-display {
-                position: absolute;
-                bottom: 20px;
-                right: 20px;
-                width: 100px; /* Adjust as needed */
-                height: 100px; /* Adjust as needed */
-                background-color: rgba(0, 0, 0, 0.5);
-                border-radius: 10px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                overflow: hidden;
-                border: 2px solid #FFD700;
-            }
+</head>
+<body>
+  <h1>손가락 숫자 인식</h1>
+  <div id="main-container">
+    <div id="container">
+      <video id="video" autoplay playsinline></video>
+      <canvas id="canvas"></canvas>
+    </div>
+  </div>
+  <div id="controls-container">
+      <div id="gesture-display" class="status-display">준비 중...</div>
+  </div>
 
-            .animal-display img {
-                max-width: 90%;
-                max-height: 90%;
-                object-fit: contain;
-            }
-        </style>
-    </head>
-    <body>
-        <div id="container"></div>
-        <div id="info">
-            <h3>너구리 게임</h3>
-            <p class="status">✅ 조명 시스템</p>
-            <p class="status">✅ 하늘 배경 및 안개</p>
-            <p class="status">✅ 수학 유틸리티 함수</p>
-            <p class="status">✅ FBXLoader 로드</p>
-            <p class="status">✅ 3D 너구리 모델 로드</p>
-            <p class="status">✅ 애니메이션 시스템</p>
-            <p style="font-size: 12px; color: #666; margin-top: 10px;">콘솔에서 로드 상태를 확인하세요</p>
-        </div>
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const gestureDisplay = document.getElementById('gesture-display');
 
-        <div id="animal-display" class="animal-display">
-            <img id="animal-image" src="" alt="Animal">
-        </div>
+    let detector;
+
+    const fingerJoints = {
+        thumb: { tip: 4, pip: 3 },
+        index: { tip: 8, pip: 6 },
+        middle: { tip: 12, pip: 10 },
+        ring: { tip: 16, pip: 14 },
+        pinky: { tip: 20, pip: 18 }
+    };
+
+    function countFingers(hand) {
+        const landmarks = hand.keypoints;
+        let extendedFingers = 0;
+
+        // 엄지손가락 확인: x 좌표를 기준으로 확인 (오른손/왼손 구분)
+        const thumbTip = landmarks[fingerJoints.thumb.tip];
+        const thumbPip = landmarks[fingerJoints.thumb.pip];
+        if ((hand.handedness === 'Right' && thumbTip.x < thumbPip.x) || 
+            (hand.handedness === 'Left' && thumbTip.x > thumbPip.x)) {
+            extendedFingers++;
+        }
+
+        // 나머지 네 손가락 확인: y 좌표를 기준으로 확인 (위로 뻗었는지)
+        for (const finger of ['index', 'middle', 'ring', 'pinky']) {
+            const tip = landmarks[fingerJoints[finger].tip];
+            const pip = landmarks[fingerJoints[finger].pip];
+            if (tip.y < pip.y) {
+                extendedFingers++;
+            }
+        }
+        return extendedFingers;
+    }
+
+    async function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const hands = await detector.estimateHands(video, { flipHorizontal: true });
+        let totalFingers = 0;
+
+        if (hands.length > 0) {
+            for (const hand of hands) {
+                totalFingers += countFingers(hand);
+
+                // 손가락 관절 그리기
+                window.HAND_CONNECTIONS.forEach(pair => {
+                    const [start, end] = [hand.keypoints[pair[0]], hand.keypoints[pair[1]]];
+                    ctx.beginPath();
+                    ctx.moveTo(start.x, start.y);
+                    ctx.lineTo(end.x, end.y);
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                });
+            }
+            gestureDisplay.innerText = `인식된 손가락: ${totalFingers}`;
+        } else {
+            gestureDisplay.innerText = '손을 보여주세요';
+        }
+
+        requestAnimationFrame(render);
+    }
+
+    async function main() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        await new Promise((resolve) => { video.onloadedmetadata = () => resolve(video); });
         
-        <script type="module" src="main.js"></script>
-    </body>
-    </html>
+        [canvas.width, canvas.height] = [video.videoWidth, video.videoHeight];
+
+        const model = handPoseDetection.SupportedModels.MediaPipeHands;
+        detector = await handPoseDetection.createDetector(model, { 
+            runtime: 'mediapipe', 
+            solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/hands', 
+            modelType: 'full', 
+            maxHands: 2 
+        });
+        
+        gestureDisplay.innerText = '준비 완료!';
+        render();
+      } catch (error) {
+        console.error("오류 발생:", error);
+        gestureDisplay.innerText = '카메라를 찾을 수 없습니다.';
+      }
+    }
+
+    main();
+  </script>
+</body>
+</html>
