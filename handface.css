@@ -1,26 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>손가락 숫자 인식 게임</title>
-<style>
 body {
   font-family: sans-serif;
   margin: 0;
   background-color: #1f2937;
   color: white;
-}
-#fps-display {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background-color: white;
-  color: black;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-family: monospace;
-  font-size: 20px;
-  z-index: 1001;
 }
 #video-widget-container {
   position: fixed;
@@ -110,43 +92,3 @@ h1 {
   background-color: rgba(255, 0, 0, 0.4);
   border: 2px solid #ffc107;
 }
-</style>
-<!-- Libraries -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-detection"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection"></script>
-
-</head>
-<body>
-  <div id="fps-display"></div>
-  
-  <div id="game-container"></div>
-
-  <div id="video-widget-container">
-    <h1>손 & 얼굴 인식</h1>
-    <div id="main-container">
-      <div id="container">
-        <video id="video" autoplay playsinline></video>
-        <canvas id="canvas"></canvas>
-        <div id="warning-overlay">
-          <div id="warning-text"></div>
-        </div>
-      </div>
-    </div>
-    <div id="controls-container">
-        <div id="gesture-display" class="status-display">준비 중...</div>
-    </div>
-  </div>
-
-  
-
-  
-  <script src="handface.js"></script>
-  <script type="module" src="game.js"></script>
-</body>
-</html>
